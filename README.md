@@ -71,3 +71,32 @@ pytest -xvs tests/
 4. ブランチにプッシュします (`git push origin feature/amazing-feature`)
 5. プルリクエストを作成します
 
+## アプリケーションのビルド方法
+
+### 依存関係のインストール
+```bash
+# 仮想環境をアクティベート
+source venv/bin/activate
+
+# 依存関係をインストール
+pip install -r requirements.txt
+
+# 基本的なビルド
+python build.py
+
+# クリーンビルド
+python build.py --clean
+
+# カスタムオプション
+python build.py --onefile --name="MyFileOrganizer" --version="1.0.0"
+
+追加で、`src/assets/icon.ico` を作成することをお勧めします。アイコンは以下のようにして作成できます：
+- オンラインのアイコンジェネレータを使用
+- Photoshopやその他のグラフィックツールで作成
+- 推奨サイズは 256x256 ピクセル
+
+最後に、`requirements.txt` に以下のパッケージを追加してください：
+pyinstaller
+PySide6
+
+これらの修正により、クロスプラットフォームでのビルドプロセスがより堅牢になります。

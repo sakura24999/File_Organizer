@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QTableWidget, QTableWidgetItem, QHeaderView, QTextEdit, QMessageBox,
     QDialog, QFormLayout, QGroupBox, QRadioButton, QSplitter, QListWidget,
     QListWidgetItem, QProgressBar, QMenu, QSystemTrayIcon, QToolBar, QStatusBar,
-    QSpacerItem, QSizePolicy
+    QSpacerItem, QSizePolicy,QStyle
 )
 
 from src.config import Config, FileRule, get_config_path, OrganizeConfig
@@ -1392,3 +1392,13 @@ class FileOrganizerApp(QMainWindow):
                 self.t["confirm"],
                 "設定をデフォルトに戻しました。アプリケーションを再起動してください。"
             )
+class FileOrganizerGUI:
+    def __init__(self):
+        # PySide6のアプリケーションを初期化
+        self.app = QApplication(sys.argv)
+        self.main_window = FileOrganizerApp()
+
+    def run(self):
+        """アプリケーションを実行"""
+        self.main_window.show()
+        return self.app.exec()

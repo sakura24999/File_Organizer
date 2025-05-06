@@ -7,10 +7,10 @@ import os
 import sys
 import argparse
 from loguru import logger
+from PySide6.QtWidgets import QApplication
 
 from src.config import Config, get_config_path
-from src.gui import FileOrganizerApp
-from src.gui import FileOrganizerGUI
+from src.gui import FileOrganizerApp, FileOrganizerGUI
 from src.file_operations import FileOperations
 from src.utils import setup_logger, get_default_log_dir
 
@@ -144,19 +144,28 @@ def main():
     # コマンドライン引数の解析
     args = parse_args()
     
+    # デバッグ用のprint文を追加
+    print("FileOrganizerApp:", FileOrganizerApp)
+    print("FileOrganizerGUI:", FileOrganizerGUI)
+    
     # コマンドラインモード
     if args.no_gui or args.scan or args.organize:
         return cli_mode(args)
     
     # GUIモード
     try:
-        app = FileOrganizerGUI()
-        app.run()
-        return 0
+        # QApplicationの作成
+        app = QApplication(sys.argv)
+        
+        # FileOrganizerAppのインスタンス作成
+        main_window = FileOrganizerApp()
+        main_window.show()
+        
+        # アプリケーションのイベントループを開始
+        return app.exec()
     except Exception as e:
         logger.error(f"アプリケーションの実行中にエラーが発生しました: {e}")
         return 1
-
 
 if __name__ == "__main__":
     sys.exit(main())

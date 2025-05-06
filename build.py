@@ -85,6 +85,9 @@ def build_executable(args):
     # 出力ファイル名
     cmd.extend(["--name", args.name])
     
+    # プラットフォーム共通のメタデータサポート
+    extra_args = []
+    
     # バージョン情報
     if system == "Windows":
         version_info = f"""
@@ -121,11 +124,23 @@ VSVersionInfo(
         version_file = "file_version_info.txt"
         with open(version_file, "w", encoding="utf-8") as f:
             f.write(version_info)
+        extra_args = []
+        extra_args.extend([
+            f'--version-file="{version_file}"' if system == "Windows" else '', 
+            f'--name={args.name}', 
+            f'--version={args.version}'
+        ])
+        
         cmd.extend(["--version-file", version_file])
+        cmd.extend(extra_args)
     
-    # アイコン
-    if args.icon:
-        cmd.extend(["--icon", args.icon])
+    # アイコンパス
+    icon_path = os.path.join('src', 'assets', 'icon.ico' if platform.system() == 'Windows' else 'icon.icns')
+
+    if os.path.exists(icon_path):
+        cmd.extend(["--icon", icon_path])
+    else:
+        print(f"警告: アイコンファイルが見つかりません: {icon_path}")
     
     # データファイル
     data_option = f"src{separator}src"
@@ -153,6 +168,13 @@ def main():
     args = parse_args()
     
     try:
+        import PyInstaller
+            import PySide6
+        except ImportError:
+            print("必要な依存関係が不足しています。以下のコマンドを実行してください:")
+            print("pip install pyinstaller PySide6")
+            return 1
+        
         output_path = build_executable(args)
         print(f"実行ファイルが正常に生成されました: {output_path}")
         return 0
