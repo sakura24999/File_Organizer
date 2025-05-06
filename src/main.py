@@ -9,6 +9,7 @@ import argparse
 from loguru import logger
 
 from src.config import Config, get_config_path
+from src.gui import FileOrganizerApp
 from src.gui import FileOrganizerGUI
 from src.file_operations import FileOperations
 from src.utils import setup_logger, get_default_log_dir
