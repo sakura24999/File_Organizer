@@ -1,0 +1,102 @@
+name: Build File Organizer
+
+on:
+  push:
+    branches: [ main ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+    - name: Run tests
+      run: |
+        pytest -xvs tests/
+
+  build-windows:
+    needs: test
+    runs-on: windows-latest
+    if: success() && (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'))
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    - name: Build executable
+      run: |
+        pyinstaller --noconfirm --onefile --windowed --name "FileOrganizer" --add-data "src;src" src/main.py
+    - name: Create Release Asset
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/upload-artifact@v3
+      with:
+        name: FileOrganizer-Windows
+        path: dist/FileOrganizer.exe
+
+  build-macos:
+    needs: test
+    runs-on: macos-latest
+    if: success() && (github.event_name == 'push' && (startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/main'))
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    - name: Build executable
+      run: |
+        pyinstaller --noconfirm --onefile --windowed --name "FileOrganizer" --add-data "src:src" src/main.py
+    - name: Create Release Asset
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: actions/upload-artifact@v3
+      with:
+        name: FileOrganizer-MacOS
+        path: dist/FileOrganizer
+
+  release:
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: success() && startsWith(github.ref, 'refs/tags/v')
+    steps:
+    - name: Download Windows Build
+      uses: actions/download-artifact@v3
+      with:
+        name: FileOrganizer-Windows
+        path: ./windows
+    - name: Download MacOS Build
+      uses: actions/download-artifact@v3
+      with:
+        name: FileOrganizer-MacOS
+        path: ./macos
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./windows/FileOrganizer.exe
+          ./macos/FileOrganizer
+        draft: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

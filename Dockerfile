@@ -21,7 +21,10 @@ COPY setup.py .
 COPY README.md .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip uninstall -y PySimpleGUI && \
+    pip cache purge && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --force-reinstall --extra-index-url https://PySimpleGUI.net/install PySimpleGUI
 RUN pip install -e .
 
 # Command to run the application
