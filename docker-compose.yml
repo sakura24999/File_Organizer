@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  file_organizer:
+    build: .
+    container_name: file_organizer
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./data:/app/data
+      - /tmp/.X11-unix:/tmp/.X11-unix  # For GUI support
+    restart: unless-stopped
+    
+  test:
+    build: .
+    container_name: file_organizer_test
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+    command: ["pytest", "-xvs", "tests/"]
